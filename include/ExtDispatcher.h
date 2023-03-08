@@ -3,6 +3,8 @@
 
 #include <utility>
 
+#include <unistd.h>
+
 #include "./dispatcher.h"
 
 namespace axio {
@@ -11,13 +13,19 @@ namespace axio {
         inline ExtDispatcher(pollfd* begin):
             Dispatcher(begin, 0) {}
 
+        inline virtual void drop(uint32_t offset) override {
+            int& fd = base_[offset].fd;
+            close(fd);
+            fd = -1;
+        }
+
         template <typename Emitter, typename ...Args>
         Emitter track(Args&&... args) {
             int fd = Emitter::construct(std::forward<Args>(args)...);
             if(fd < 0) throw InitError<Emitter>();
             base_[size_].events = Emitter::defEvts;
             base_[size_].fd = fd;
-            return Emitter(fd, size_++, *this);
+            return Emitter(*this, size_++, fd);
         }
     };
 } // namespace axio

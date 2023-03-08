@@ -1,50 +1,35 @@
 #ifndef AXIO_EMITTER
 #define AXIO_EMITTER
 
-#include "./dispatcher.h"
+#include <cstdint>
 
 namespace axio {
     using EvtVec = short;
 
+    class Dispatcher;
+
     class Emitter {
       public:
-        inline Emitter(int fd, uint32_t offset, Dispatcher& parent):
-            fd_(fd), offset_(offset), parent_(parent) {};
+        Emitter(Dispatcher& parent, uint32_t offset, int fd);
 
-        inline Emitter(Emitter&& other):
-            fd_(other.fd_), offset_(other.offset_), parent_(other.parent_) {
-            other.fd_ = -fd_;
-        };
+        Emitter(Emitter&& other);
 
-        Emitter(Emitter& other) = delete;
-        Emitter& operator=(Emitter& other) = delete;
+        void update(int fd) noexcept;
 
-        inline void update(int fd) noexcept {
-            parent_.base_[offset_].fd = fd;
-            fd_ = fd;
-        }
+        void listen(EvtVec events) noexcept;
 
-        inline int getRawFd() const noexcept {
-            return fd_;
-        }
+        void drop() noexcept;
 
-        inline EvtVec& getPending() const noexcept {
-            return parent_.base_[offset_].revents;
-        }
+        int getRawFd() const noexcept;
 
-        inline void listen(EvtVec events) noexcept {
-            parent_.base_[offset_].events = events;
-        }
-
-        inline ~Emitter() noexcept {
-            update(-fd_);
-            close(fd_);
-        };
+        template<typename> friend class Event;
 
       protected:
-        int         fd_;
-        uint32_t    offset_;
+        using Offset = const uint32_t;
+
         Dispatcher& parent_;
+        Offset      offset_;
+        int         fd_;
     };
 } // namespace axio
 

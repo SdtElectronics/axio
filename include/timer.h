@@ -22,7 +22,7 @@ class Timer: public Emitter {
         monotonic = CLOCK_MONOTONIC
     };
 
-    Timer(int fd, uint32_t offset, Dispatcher& parent);
+    Timer(Dispatcher& parent, uint32_t offset, int fd);
 
     int setTimeout(time_t sec, time_t nsec) noexcept;
     int setInterval(time_t sec, time_t nsec) noexcept;

@@ -13,7 +13,7 @@ namespace axio {
         enum Events: EvtVec { readable = POLLIN };
         enum InitErr { ioError = EIO };
 
-        Stdin(int fd, uint32_t offset, Dispatcher& parent);
+        Stdin(Dispatcher& parent, uint32_t offset, int fd);
 
         int read(char* buf, size_t size);
 

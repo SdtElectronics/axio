@@ -7,6 +7,8 @@
 
 #include <poll.h>
 
+#include "./emitter.h"
+
 namespace axio {
     class DispatcherError: public std::runtime_error {
       public:
@@ -41,21 +43,18 @@ namespace axio {
         Dispatcher(Dispatcher& other) = delete;
         Dispatcher& operator=(Dispatcher& other) = delete;
 
-        inline int getRawFd(std::size_t offset) const noexcept {
-            return base_[offset].fd;
-        }
-
         template <typename EvtIter>
-        void dispatch(EvtIter begin, EvtIter end, int timeout = -1) {
+        void dispatch(EvtIter&& begin, EvtIter&& end, int timeout = -1) {
             while(true) {
                 int ready = poll(base_, size_, timeout);
                 if(ready < 0) throw DispatcherError();
 
                 for(auto current = begin; current != end; ++current) {
-                    short& revents = current->emitter.getPending();
-                    if(current->events & revents) {
-                        if(!current->callback(current->emitter)) return;
-                        int cleared = (revents -= current->events) == 0;
+                    pollfd& evfd = base_[current->offset];
+                    if(current->events & evfd.revents) {
+                        if(!current->callback(
+                            Emitter(*this, current->offset, evfd.fd))) return;
+                        int cleared = (evfd.revents -= current->events) == 0;
                         if((ready -= cleared) == 0) break;
                     }
                 };
@@ -65,6 +64,8 @@ namespace axio {
         friend class Emitter;
 
       protected:
+        virtual void drop(uint32_t offset) = 0;
+
         pollfd*     base_;
         std::size_t size_;
     };

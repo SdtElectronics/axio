@@ -8,7 +8,7 @@
 #include "stdin.h"
 #include "ExtDispatcher.h"
 
-using Event = axio::Event<std::function<bool(axio::Emitter&)> >;
+using Event = axio::Event<std::function<bool(axio::Emitter)> >;
 
 int main() {
     pollfd fds[2];
@@ -18,13 +18,13 @@ int main() {
     auto sin = dispatcher.track<axio::Stdin>();
 
     Event events[2] = {
-        Event(axio::Timer::fired, timer, [](axio::Emitter& emitter) {
+        Event(axio::Timer::fired, timer, [](axio::Emitter emitter) {
             static_cast<axio::Timer&>(emitter).clear();
             printf("No input for 10s, exiting...\n");
             return false;
         }),
 
-        Event(axio::Stdin::readable, sin, [&timer](axio::Emitter& emitter) {
+        Event(axio::Stdin::readable, sin, [&timer](axio::Emitter emitter) {
             timer.setTimeout(10, 0);
             auto& in = static_cast<axio::Stdin&>(emitter);
             char buf[100];
@@ -36,7 +36,7 @@ int main() {
     };
 
     timer.setTimeout(10, 0);
-    dispatcher.dispatch(events, events + 2);
+    dispatcher.dispatch(events + 0, events + 2);
     return 0;
 }
 

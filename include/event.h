@@ -7,10 +7,12 @@ namespace axio {
     template <typename Callable>
     struct Event {
         Event(EvtVec evt, Emitter& emt, Callable cb):
-            events(evt), emitter(emt), callback(cb) {}
+            events(evt), offset(emt.offset_), callback(cb) {}
+
+        using Offset = Emitter::Offset;
 
         EvtVec   events;
-        Emitter& emitter;
+        Offset   offset;
         Callable callback;
     };
 } // namespace axio
