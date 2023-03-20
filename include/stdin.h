@@ -15,8 +15,6 @@ namespace axio {
 
         Stdin(Dispatcher& parent, uint32_t offset, int fd);
 
-        int read(char* buf, size_t size);
-
         static int construct() noexcept;
 
         static constexpr EvtVec defEvts = readable;

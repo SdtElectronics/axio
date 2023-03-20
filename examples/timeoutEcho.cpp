@@ -6,6 +6,7 @@
 #include "event.h"
 #include "timer.h"
 #include "stdin.h"
+#include "bufReader.h"
 #include "ExtDispatcher.h"
 
 using Event = axio::Event<std::function<bool(axio::Emitter)> >;
@@ -26,11 +27,9 @@ int main() {
 
         Event(axio::Stdin::readable, sin, [&timer](axio::Emitter emitter) {
             timer.setTimeout(10, 0);
-            auto& in = static_cast<axio::Stdin&>(emitter);
-            char buf[100];
-            int sz = in.read(buf, 99);
-            buf[sz] = '\0';
-            printf("%s", buf);
+            axio::bufReader<100> buf;
+            auto view = buf.read(emitter);
+            printf("%.*s", view.size(), view.data());
             return true;
         })
     };
