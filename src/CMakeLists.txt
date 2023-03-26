@@ -1,5 +1,5 @@
 add_library(axio
-    # channel.cpp
+    channel.cpp
     emitter.cpp
     socket.cpp
     stdin.cpp
