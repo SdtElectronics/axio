@@ -43,18 +43,30 @@ namespace axio {
         Dispatcher(Dispatcher& other) = delete;
         Dispatcher& operator=(Dispatcher& other) = delete;
 
-        template <typename EvtIter>
-        void dispatch(EvtIter&& begin, EvtIter&& end, int timeout = -1) {
+        template <typename EvtIter, typename TimeoutCb = bool(*)()>
+        void dispatch(
+            EvtIter&& begin,
+            EvtIter&& end,
+            int timeout = -1,
+            TimeoutCb cb = []{ return true; }
+        ) {
             while(true) {
                 int ready = poll(base_, size_, timeout);
-                if(ready < 0) throw DispatcherError();
+                if(ready < 1) {
+                    if(ready == 0) { /* timeout */
+                        if(cb()) { continue; } else { return; }
+                    }           /* (else) error */
+                    throw DispatcherError();
+                }
 
                 for(auto current = begin; current != end; ++current) {
                     pollfd& evfd = base_[current->offset];
                     if(current->events & evfd.revents) {
                         if(!current->callback(
-                            Emitter(*this, current->offset, evfd.fd))) return;
-                        int cleared = (evfd.revents -= current->events) == 0;
+                            Emitter(*this, current->offset, evfd.fd))
+                        ) return;
+                        short umask = ~current->events;
+                        int cleared = (evfd.revents &= umask) == 0;
                         if((ready -= cleared) == 0) break;
                     }
                 };

@@ -3,8 +3,6 @@
 
 #include <utility>
 
-#include <unistd.h>
-
 #include "./dispatcher.h"
 
 namespace axio {
@@ -15,7 +13,6 @@ namespace axio {
 
         inline virtual void drop(uint32_t offset) override {
             int& fd = base_[offset].fd;
-            close(fd);
             fd = -1;
         }
 

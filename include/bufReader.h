@@ -12,28 +12,15 @@ namespace axio {
     template <std::size_t S>
     class bufReader {
       public:
-        bufReader(Dispatcher& parent, uint32_t offset, int fd);
+        bufReader() {}
 
-        void read(Emitter& emitter) {
-            size = read(emitter.getRawFd(), buf_, S);
-            if(size < 0);
-        }
-
-        char& operator[](std::size_t index) const noexcept {
-            return buf_[index];
-        }
-
-        std::string_view data() const noexcept {
-            return std::string_view(buf_, size_);
-        }
-
-        std::string_view slice(std::size_t begin, int end = 0) const noexcept {
-            return std::string_view(buf_, size_ + end);
+        std::string_view read(Emitter& emitter) {
+            int size = ::read(emitter.getRawFd(), buf_, S);
+            return std::string_view(size < 0 ? nullptr : buf_, size);
         }
 
       private:
-        char        buf_[S];
-        std::size_t size_;
+        char buf_[S];
     };
 } // namespace axio
 

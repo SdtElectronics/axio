@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "./dispatcher.h"
 #include "./emitter.h"
 
@@ -22,6 +24,7 @@ namespace axio {
 
     void Emitter::drop() noexcept {
         parent_.drop(offset_);
+        close(fd_);
     }
 
     int Emitter::getRawFd() const noexcept {
