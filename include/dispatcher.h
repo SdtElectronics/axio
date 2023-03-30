@@ -2,6 +2,7 @@
 #define AXIO_DISPATCHER
 
 #include <cerrno>
+#include <functional>
 #include <stdexcept>
 #include <vector>
 
@@ -43,18 +44,22 @@ namespace axio {
         Dispatcher(Dispatcher& other) = delete;
         Dispatcher& operator=(Dispatcher& other) = delete;
 
-        template <typename EvtIter, typename TimeoutCb = bool(*)()>
+        template <typename EvtIter, typename F = bool(*)(), typename... Args>
         void dispatch(
             EvtIter&& begin,
             EvtIter&& end,
             int timeout = -1,
-            TimeoutCb cb = []{ return true; }
+            F ontimeout = []{ return true; },
+            Args... args
         ) {
             while(true) {
                 int ready = poll(base_, size_, timeout);
                 if(ready < 1) {
                     if(ready == 0) { /* timeout */
-                        if(cb()) { continue; } else { return; }
+                        if(std::invoke(
+                            ontimeout,
+                            std::forward<Args>(args)...
+                        )) continue; else return;
                     }           /* (else) error */
                     throw DispatcherError();
                 }
@@ -62,9 +67,11 @@ namespace axio {
                 for(auto current = begin; current != end; ++current) {
                     pollfd& evfd = base_[current->offset];
                     if(current->events & evfd.revents) {
-                        if(!current->callback(
-                            Emitter(*this, current->offset, evfd.fd))
-                        ) return;
+                        if(!std::invoke(
+                            current->callback,
+                            Emitter(*this, current->offset, evfd.fd),
+                            std::forward<Args>(args)...
+                        )) return;
                         short umask = ~current->events;
                         int cleared = (evfd.revents &= umask) == 0;
                         if((ready -= cleared) == 0) break;
