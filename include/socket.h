@@ -14,8 +14,10 @@ namespace axio {
 class Socket: public Emitter {
   public:
     enum Events: EvtVec {
-        readable = POLLIN,
-        acceptable = POLLIN
+        readable     = POLLIN,
+        acceptable   = POLLIN,
+        writable     = POLLOUT,
+        disconnected = POLLHUP
     };
     enum InitErr {
         unpermitted = EPERM,
