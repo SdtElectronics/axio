@@ -17,7 +17,8 @@ class Socket: public Emitter {
         readable     = POLLIN,
         acceptable   = POLLIN,
         writable     = POLLOUT,
-        disconnected = POLLHUP
+        disconnected = POLLHUP,
+        error        = POLLERR
     };
     enum InitErr {
         unpermitted = EPERM,

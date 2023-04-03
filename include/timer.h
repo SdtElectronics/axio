@@ -12,7 +12,10 @@ namespace axio {
 
 class Timer: public Emitter {
   public:
-    enum Events: EvtVec { fired = POLLIN };
+    enum Events: EvtVec {
+      fired = POLLIN,
+      error = POLLERR
+    };
     enum InitErr {
         unpermitted = EPERM,
         outofMemory = ENOMEM

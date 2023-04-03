@@ -10,7 +10,10 @@
 namespace axio {
     class Stdin: public Emitter {
       public:
-        enum Events: EvtVec { readable = POLLIN };
+        enum Events: EvtVec {
+          readable = POLLIN,
+          error    = POLLERR
+        };
         enum InitErr { ioError = EIO };
 
         Stdin(Dispatcher& parent, uint32_t offset, int fd);
