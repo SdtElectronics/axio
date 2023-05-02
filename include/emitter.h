@@ -12,7 +12,8 @@ namespace axio {
       public:
         Emitter(Dispatcher& parent, uint32_t offset, int fd);
 
-        Emitter(Emitter&& other);
+        Emitter(const Emitter& other);
+        Emitter& operator=(Emitter& other);
 
         void update(int fd) noexcept;
 
@@ -25,7 +26,7 @@ namespace axio {
         template<typename> friend class Event;
 
       protected:
-        using Offset = const uint32_t;
+        using Offset = uint32_t;
 
         Dispatcher& parent_;
         Offset      offset_;

@@ -50,7 +50,7 @@ namespace axio {
             EvtIter&& end,
             int timeout = -1,
             F ontimeout = []{ return true; },
-            Args... args
+            Args&&... args
         ) {
             while(true) {
                 int ready = poll(base_, size_, timeout);
@@ -69,8 +69,8 @@ namespace axio {
                     if(current->events & evfd.revents) {
                         if(!std::invoke(
                             current->callback,
-                            Emitter(*this, current->offset, evfd.fd),
-                            std::forward<Args>(args)...
+                            std::forward<Args>(args)...,
+                            Emitter (*this, current->offset, evfd.fd)
                         )) return;
                         short umask = ~current->events;
                         int cleared = (evfd.revents &= umask) == 0;
