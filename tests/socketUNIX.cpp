@@ -19,7 +19,7 @@ TEST_CASE("UNIX domain socket") {
         axio::ExtDispatcher dispatcher(fds);
         auto server = dispatcher.track<axio::Socket>(axio::Socket::UNIX, axio::Socket::packet);
 
-        axio::Socket::UNIXAddress addr("/tmp/axio_test.sock");
+        axio::Socket::UNIXAddressOwning addr("/tmp/axio_test.sock");
 
         if(!server.listen(addr, 1)) FAIL("listen failed");
 

@@ -42,11 +42,18 @@ class Socket: public Emitter {
 
     struct UNIXAddress: public Address {
         UNIXAddress(std::string_view address);
-        UNIXAddress(UNIXAddress&& src) noexcept;
+        UNIXAddress(const UNIXAddress& src) noexcept;
 
-        UNIXAddress& operator=(UNIXAddress&& src) noexcept;
+        UNIXAddress& operator=(const UNIXAddress& src) noexcept;
+    };
 
-        ~UNIXAddress() noexcept;
+    struct UNIXAddressOwning: public UNIXAddress {
+        UNIXAddressOwning(std::string_view address);
+        UNIXAddressOwning(UNIXAddressOwning&& src) noexcept;
+
+        UNIXAddressOwning& operator=(UNIXAddressOwning&& src) noexcept;
+
+        ~UNIXAddressOwning() noexcept;
     };
 
     struct Client {

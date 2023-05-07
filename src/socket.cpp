@@ -48,24 +48,38 @@ namespace axio {
         address.copy(servaddr.sun_path, address.size());
     }
 
-    Socket::UNIXAddress::UNIXAddress(UNIXAddress&& src) noexcept {
+    Socket::UNIXAddress::UNIXAddress(const UNIXAddress& src) noexcept {
         sockaddr_un& dstaddr = *((sockaddr_un*)&addr);
         sockaddr_un& srcaddr = *((sockaddr_un*)&src.addr);
         dstaddr = srcaddr;
-        srcaddr.sun_path[0] = '\0';
         len = src.len;
     }
 
-    Socket::UNIXAddress& Socket::UNIXAddress::operator=(UNIXAddress&& src) noexcept {
+    Socket::UNIXAddress&
+    Socket::UNIXAddress::operator=(const UNIXAddress& src) noexcept {
         sockaddr_un& dstaddr = *((sockaddr_un*)&addr);
         sockaddr_un& srcaddr = *((sockaddr_un*)&src.addr);
         dstaddr = srcaddr;
-        srcaddr.sun_path[0] = '\0';
         len = src.len;
         return *this;
     }
 
-    Socket::UNIXAddress::~UNIXAddress() noexcept {
+    Socket::UNIXAddressOwning::UNIXAddressOwning(std::string_view address)
+        : UNIXAddress(address) {}
+
+    Socket::UNIXAddressOwning::UNIXAddressOwning(UNIXAddressOwning&& src)
+        noexcept: UNIXAddress(src) {
+        ((sockaddr_un*)&src.addr)->sun_path[0] = '\0';
+    }
+
+    Socket::UNIXAddressOwning&
+    Socket::UNIXAddressOwning::operator=(UNIXAddressOwning&& src) noexcept {
+        UNIXAddress::operator=(src);
+        ((sockaddr_un*)&src.addr)->sun_path[0] = '\0';
+        return *this;
+    }
+
+    Socket::UNIXAddressOwning::~UNIXAddressOwning() noexcept {
         sockaddr_un& servaddr = *((sockaddr_un*)&addr);
         unlink(servaddr.sun_path);
     }
