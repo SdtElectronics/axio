@@ -27,8 +27,8 @@ class Timer: public Emitter {
 
     Timer(Dispatcher& parent, uint32_t offset, int fd);
 
-    int setTimeout(time_t sec, time_t nsec) noexcept;
-    int setInterval(time_t sec, time_t nsec) noexcept;
+    int setTimeout(time_t sec, time_t nsec = 0) noexcept;
+    int setInterval(time_t sec, time_t nsec = 0) noexcept;
     int clear();
     int reset();
 
