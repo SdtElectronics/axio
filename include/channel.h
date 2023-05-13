@@ -17,7 +17,10 @@ namespace axio {
 
     class ChanTX: public Emitter {
       public:
-        enum Events: EvtVec { writable = POLLOUT };
+        enum Events: EvtVec {
+            writable = POLLOUT,
+            error    = POLLERR
+        };
         enum InitErr { ioError = EIO };
 
         using Emitter::Emitter;
@@ -35,7 +38,10 @@ namespace axio {
 
     class ChanRX: public Emitter {
       public:
-        enum Events: EvtVec { readable = POLLIN };
+        enum Events: EvtVec {
+            readable = POLLIN,
+            error    = POLLERR
+        };
         enum InitErr { ioError = EIO };
 
         using Emitter::Emitter;
